@@ -1,0 +1,1780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>DOC ISSUE TRACKER</title>
+
+<!-- SheetJS (XLSX) -->
+<script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script>
+
+<style>
+:root {
+    --brand:#007bff;
+    --brand-dark:#0056b3;
+    --bg:#f4f6f8;
+    --card:#ffffff;
+}
+
+
+
+.container {
+    max-width: 900px;
+    margin: 30px auto 0 auto; 
+    background: rgba(255, 255, 255, 0.75);
+    backdrop-filter: blur(8px);
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.4);
+}
+
+header {
+    background:var(--brand);
+    color:white;
+    padding:15px;
+}
+
+.header-content {
+    display:grid;
+    grid-template-columns:1fr auto 1fr;
+    align-items:center;
+}
+
+.header-content .center {
+    text-align:center;
+    font-size:28px;
+    font-weight:bold;
+}
+
+.header-content img {
+    height:60px;
+}
+
+select,
+textarea,
+input[type="text"],
+input[type="file"],
+input[list],
+button {
+    width:100%;
+    padding:10px;
+    margin:8px 0;
+    border:1px solid #ccc;
+    border-radius:6px;
+    font-size:14px;
+}
+
+textarea { resize:vertical; }
+
+button.primary {
+    background:var(--brand);
+    color:#fff;
+    border:none;
+    cursor:pointer;
+}
+
+button.primary:hover {
+    background:var(--brand-dark);
+}
+
+body, button, input, textarea, select, h1, h2, h3, h4, h5, h6 {
+    font-family: "Segoe UI", Calibri, Arial, sans-serif;
+    font-weight: 500;   /* Slight bold */
+    color: #1a1a1a;
+    letter-spacing: 0.3px;
+}
+
+body {
+    background: #f6f8fa;
+    background-image: radial-gradient(#d0d7de 1px, transparent 1px);
+    background-size: 12px 12px;
+    margin: 0;
+    padding: 0;
+}
+/* SEARCHABLE DROPDOWN */
+.search-container {
+    position: relative;
+    width: 100%;
+}
+
+.search-input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    font-size: 14px;
+}
+
+.search-dropdown {
+    position: relative;
+    width: 100%;
+    background: white;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    max-height: 220px;
+    overflow-y: auto;
+    display: none;
+    z-index: 10000;
+}
+
+.search-item {
+    padding: 10px;
+    cursor: pointer;
+}
+
+.search-item:hover {
+    background: #efefef;
+}
+
+textarea {
+    width:100%;
+    padding:10px;
+    border-radius:6px;
+    border:1px solid #ccc;
+    margin-top:10px;
+    resize:vertical;
+}
+
+button.primary {
+    background:var(--brand);
+    color:white;
+    padding:10px 16px;
+    border:none;
+    border-radius:6px;
+    cursor:pointer;
+    font-size:15px;
+}
+
+button.primary:hover {
+    background:var(--brand-dark);
+}
+
+.error {
+    color:red;
+    white-space:pre-wrap;
+    border:1px solid #ccc;
+    padding:10px;
+    background:#fafafa;
+    max-height:220px;
+    overflow:auto;
+    margin-top:10px;
+}
+/* Highlighted resolution box */
+.resolution-box {
+    background: #e8f9e9;
+    border-left: 6px solid #4caf50;
+    padding: 14px;
+    border-radius: 6px;
+    font-size: 15px;
+    font-weight: 500;
+    color: #1a381a;
+    line-height: 1.5;
+    white-space: pre-wrap;
+}
+
+/* Collapsible wrapper */
+.resolution-wrapper {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease;
+    margin-top: 10px;
+}
+/* Dim background */
+#resolutionOverlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.45);
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.35s ease;
+    z-index: 9998;
+}
+
+/* Slide-up resolution panel */
+#resolutionPanel {
+    position: fixed;
+    left: 0;
+    bottom: -100%;    /* completely hidden */
+    width: 100%;
+    height: 70%;
+    background: #ffffff;
+    border-radius: 16px 16px 0 0;
+    padding: 20px;
+    box-shadow: 0 -6px 20px rgba(0,0,0,0.25);
+    z-index: 9999;
+    overflow-y: auto;
+    transition: bottom 0.45s ease;
+    visibility: hidden;   /* ❗ panel fully hidden */
+}
+.close-resolution-btn {
+    display: none;
+}
+
+
+/* Resolution content inside panel */
+#resolutionPanelContent {
+    background: #e8f9e9;
+    border-left: 6px solid #4caf50;
+    padding: 16px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: 500;
+    color: #1a381a;
+    line-height: 1.6;
+    white-space: pre-wrap;
+}
+
+/* Close button */
+.close-resolution-btn {
+    background: #0056b3;
+    color: white;
+    padding: 10px 16px;
+    border: none;
+    border-radius: 6px;
+    float: right;
+    margin-bottom: 20px;
+    cursor: pointer;
+}
+.section-card {
+    background: white;
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin: 22px 0;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    border: 1px solid #e8e8e8;
+}
+
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 19px;
+    font-weight: 600;
+    padding-bottom: 10px;
+    border-bottom: 1px solid #f0f0f0;
+    margin-bottom: 15px;
+}
+
+.section-title .icon {
+    font-size: 24px;
+}
+
+.search-container {
+    margin-top: 12px;
+}
+.qc-card {
+    background: white;
+    border-radius: 12px;
+    padding: 22px 24px;
+    margin: 30px 0;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    border: 1px solid #e8e8e8;
+}
+
+.qc-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 22px;
+    font-weight: 600;
+    margin-bottom: 20px;
+}
+
+.qc-title span.icon {
+    font-size: 28px;
+}
+
+.qc-label {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 6px;
+    margin-top: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.qc-textarea {
+    width: 100%;
+    padding: 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    min-height: 110px;
+    border: 1px solid #ccc;
+    resize: vertical;
+}
+
+.qc-inner {
+    max-width: 820px;
+    margin: auto;
+}
+
+.qc-textarea {
+    width: 100%;
+    max-width: 820px;
+    padding: 14px;
+    border-radius: 8px;
+    font-size: 14px;
+    min-height: 110px;
+    border: 1px solid #ccc;
+    resize: vertical;
+    box-sizing: border-box;
+}
+.section-card {
+    background: #ffffff;
+    border-radius: 12px;
+    padding: 18px 20px;
+    margin: 22px 0;
+    box-shadow: 0 3px 16px rgba(0,0,0,0.06);
+    border-left: 6px solid var(--accent);
+    transition: 0.2s ease;
+}
+
+/* Hover glow */
+.section-card:hover {
+    box-shadow: 0 6px 22px rgba(0,0,0,0.10);
+    transform: translateY(-2px);
+}
+
+/* Different accent colors per module */
+#wrap-preIntake       { --accent: #ffc107; } /* Yellow */
+#wrap-importAutomation{ --accent: #26a4ff; } /* Blue */
+#wrap-processing      { --accent: #b47cff; } /* Purple */
+#wrap-migrateFilter   { --accent: #d17b4c; } /* Brown */
+#wrap-legalExport     { --accent: #ff5b5b; } /* Red */
+#wrap-exportLoadfile  { --accent: #4caf50; } /* Green */
+
+/* Title improvements */
+.section-title {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    font-size: 20px;
+    font-weight: 600;
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+.section-title .icon {
+    font-size: 28px;
+}
+
+
+
+
+</style>
+</head>
+
+<body>
+
+    <div id="resolutionOverlay"></div>
+    
+    <!-- Slide-up Panel -->
+    <div id="resolutionPanel">
+        <button class="close-resolution-btn" onclick="closeResolutionPanel()">Close</button>
+        <h2>Resolution</h2>
+        <div id="resolutionPanelContent"></div>
+    </div>
+
+<header>
+    <div class="header-content">
+        <div class="left">
+            <img src="file:///C:/Users/Rakesh.R/Issue_Tracker/Images/logo.png" alt="logo">
+        </div>
+        <div class="center">DOC ISSUE TRACKER</div>
+        <div></div>
+    </div>
+</header>
+
+<div class="container">
+
+    <h3 class="section-header-icon">
+    <span class="icon">📄</span>
+    Log File Failure Reader
+</h3>
+
+    <input type="file" id="logFile" accept=".log,.txt">
+    <button class="primary read-log-btn" onclick="readLog()">
+        <span class="icon">🔍</span>
+        Read Log
+    </button>
+
+
+    <h3 class="section-header-icon">
+    <span class="icon">❗</span>
+    Detected Failures
+</h3>
+
+    <div id="output"></div>
+
+<script>
+function showDropdownForError(errorType) {
+    const mapping = {
+        "Pre Intake Error": "wrap-preIntake",
+        "Import Automation Error": "wrap-importAutomation",
+        "Processing Job Error": "wrap-processing",
+        "Migrate/Filter Error": "wrap-migrateFilter",
+        "Legal Export Error": "wrap-legalExport",
+        "Export Loadfile Error": "wrap-exportLoadfile"
+    };
+
+    Object.values(mapping).forEach(id => {
+        document.getElementById(id).style.display = "none";
+    });
+
+    if (mapping[errorType]) {
+        document.getElementById(mapping[errorType]).style.display = "block";
+    }
+}
+
+function showAllDropdowns() {
+    [
+        "wrap-preIntake", "wrap-importAutomation", "wrap-processing",
+        "wrap-migrateFilter", "wrap-legalExport", "wrap-exportLoadfile"
+    ].forEach(id => document.getElementById(id).style.display = "block");
+}
+
+function readLog() {
+    const fileInput = document.getElementById("logFile");
+    const output = document.getElementById("output");
+
+    output.innerHTML = "";
+
+    if (!fileInput.files.length) {
+        alert("Please select a log file");
+        return;
+    }
+
+    const file = fileInput.files[0];
+    const reader = new FileReader();
+
+   reader.onload = function (event) {
+
+        const content = event.target.result;  // ✅ content first
+        const lines = content.split("\n");
+
+        const errorKeywords = ["ERROR", "FAIL", "EXCEPTION", "FATAL", "FAILURE", "FAILED"];
+
+        const workflowErrors = [
+            { keyword: "Workflow.PreIntake", message: "Pre Intake Error" },
+            { keyword: "Workflow.ImportIntakeLog", message: "Import Automation Error" },
+            { keyword: "Automation.Workflow.Batching.BatchManager", message: "Import Automation Error" },
+            { keyword: "NuixOperation: Processing", message: "Processing Job Error" },
+            { keyword: "Workflow.MigrateFilter", message: "Migrate/Filter Error" },
+            { keyword: "NuixOperation: LegalExport", message: "Legal Export Error" },
+            { keyword: "Workflow.ExportLoadFile", message: "Export Loadfile Error" }
+        ];
+
+        const detectedWorkflowErrors = workflowErrors
+            .filter(wf => lines.some(line => line.includes(wf.keyword)))
+            .map(wf => wf.message);
+
+        const failures = lines.filter(line =>
+            errorKeywords.some(keyword => line.toUpperCase().includes(keyword))
+        );
+
+        // ===============================
+        // ✅ AUTO-SELECT FAILED MIGRATE E043
+        // ===============================
+        if (content.includes("Failed Migrate. E043")) {
+            showDropdownForError("Migrate/Filter Error");
+
+            const input = document.getElementById("migrateFilter");
+            input.value = "failedMigrate";
+
+            updateTextareas();
+        }
+         if (content.includes("Failed to validate ticket: Status must be one of the following: InProgress, Reopened")) {
+           showDropdownForError("Import Automation Error");
+
+           const input = document.getElementById("importAutomation");
+           input.value = "Ticketstatus";
+
+           updateTextareas();
+       
+       }
+          if (content.includes("Failed to import ")) {
+           showDropdownForError("Import Automation Error");
+
+           const input = document.getElementById("importAutomation");
+           input.value = "importencase";
+
+           updateTextareas();
+       }
+       if(content.includes("java.lang.OutOfMemoryError: GC overhead limit exceeded")){
+        showDropdownForError("Legal Export Error");
+
+        const input = document.getElementById("legalExport");
+        input.value = "JavaHeapMemory";
+
+        updateTextareas();
+       }
+       if (content.includes("Incomplete zip: 'Data after end of archive', possible corruption")) {
+           showDropdownForError("Pre Intake Error");
+
+           const input = document.getElementById("preIntake");
+           input.value = "Corruptempty";
+
+           updateTextareas();
+       }
+       if (content.includes("Cannot open encrypted archive. Wrong password?")) {
+           showDropdownForError("Pre Intake Error");
+
+           const input = document.getElementById("preIntake");
+           input.value = "wrongPassword";
+
+           updateTextareas();
+       }
+        if (content.includes("Headers Error")) {
+           showDropdownForError("Pre Intake Error");
+
+           const input = document.getElementById("preIntake");
+           input.value = "HeaderError";
+
+           updateTextareas();
+       }
+        if (content.includes("Failed to Create Load File from EXT.RetrieveLoadfileData")) {
+           showDropdownForError("Export Loadfile Error");
+
+           const input = document.getElementById("exportLoadfile");
+           input.value = "timeoutExpired";
+
+           updateTextareas();
+       }
+      
+        
+
+
+        // ▬ output rendering ▬
+        let htmlOutput = `<p><strong>File:</strong> ${file.name}</p>`;
+
+        if (detectedWorkflowErrors.length > 0) {
+            htmlOutput += `<div class="summary">${[...new Set(detectedWorkflowErrors)].join("<br>")}</div>`;
+            showDropdownForError(detectedWorkflowErrors[0]);
+        } else {
+            showAllDropdowns();
+        }
+
+        if (failures.length > 0) {
+            htmlOutput += `<div class="error">${failures.join("\n")}</div>`;
+        } else if (detectedWorkflowErrors.length === 0) {
+            htmlOutput += "<p>No failures found.</p>";
+        }
+
+        output.innerHTML = htmlOutput;
+    };
+
+    reader.readAsText(file);
+}
+</script>
+</div>
+
+<!-- ========================================================= -->
+<!-- SEARCHABLE DROPDOWNS (ALL 6) -->
+<!-- ========================================================= -->
+
+<!-- ========================================================= -->
+<!-- MAIN PAGE WITH UPDATED SEARCHABLE DROPDOWN WRAPPERS -->
+<!-- ========================================================= -->
+<div class="container">
+
+<!-- ===================== PRE INTAKE ===================== -->
+<div class="section-card" id="wrap-preIntake">
+    <div class="section-title">
+        <span class="icon">🗂️</span>
+        <span>Pre-Intake</span>
+    </div>
+
+    <div id="preIntake-container" class="search-container">
+        <input id="preIntake" class="search-input" placeholder="Select or type to search">
+        <div id="preIntake-dropdown" class="search-dropdown"></div>
+    </div>
+</div>
+
+
+<!-- ================= IMPORT AUTOMATION ================= -->
+<div class="section-card" id="wrap-importAutomation">
+    <div class="section-title">
+        <span class="icon">🔄</span>
+        <span>Import Automation</span>
+    </div>
+
+    <div id="importAutomation-container" class="search-container">
+        <input id="importAutomation" class="search-input" placeholder="Select or type to search">
+        <div id="importAutomation-dropdown" class="search-dropdown"></div>
+    </div>
+</div>
+
+
+
+<!-- ===================== PROCESSING ===================== -->
+<div class="section-card" id="wrap-processing">
+    <div class="section-title">
+        <span class="icon">⚙️</span>
+        <span>Processing</span>
+    </div>
+
+    <div id="processing-container" class="search-container">
+        <input id="processing" class="search-input" placeholder="Select or type to search">
+        <div id="processing-dropdown" class="search-dropdown"></div>
+    </div>
+</div>
+
+
+<!-- ================== MIGRATE FILTER ==================== -->
+<div class="section-card" id="wrap-migrateFilter">
+    <div class="section-title">
+        <span class="icon">📦</span>
+        <span>Migrate Filter</span>
+    </div>
+
+    <div id="migrateFilter-container" class="search-container">
+        <input id="migrateFilter" class="search-input" placeholder="Select or type to search">
+        <div id="migrateFilter-dropdown" class="search-dropdown"></div>
+    </div>
+</div>
+
+
+
+<!-- =================== LEGAL EXPORT ===================== -->
+<div class="section-card" id="wrap-legalExport">
+    <div class="section-title">
+        <span class="icon">📤</span>
+        <span>Legal Export</span>
+    </div>
+
+    <div id="legalExport-container" class="search-container">
+        <input id="legalExport" class="search-input" placeholder="Select or type to search">
+        <div id="legalExport-dropdown" class="search-dropdown"></div>
+    </div>
+</div>
+
+
+<!-- ================= EXPORT LOADFILE ===================== -->
+<div class="section-card" id="wrap-exportLoadfile">
+    <div class="section-title">
+        <span class="icon">📁</span>
+        <span>Export Loadfile</span>
+    </div>
+
+    <div id="exportLoadfile-container" class="search-container">
+        <input id="exportLoadfile" class="search-input" placeholder="Select or type to search">
+        <div id="exportLoadfile-dropdown" class="search-dropdown"></div>
+    </div>
+</div>
+
+
+
+<!-- ============ TEXTAREAS (unchanged) ================= -->
+<div class="qc-card">
+    <div class="qc-inner">
+
+        <div class="qc-title">
+            <span class="icon">📝</span>
+            <span>QC Error Notes</span>
+        </div>
+
+        <div>
+            <div class="qc-label"><span>🔍</span> Description</div>
+            <textarea id="description" class="qc-textarea"></textarea>
+        </div>
+
+        <div>
+            <div class="qc-label"><span>⚠️</span> Cause</div>
+            <textarea id="cause" class="qc-textarea"></textarea>
+        </div>
+
+    </div>
+</div>
+
+
+
+<button id="resolutionBtn" class="primary" style="background:#28a745;" onclick="handleResolutionClick()">
+    View Resolution
+</button>
+<div id="resolutionBox" style="display:none;"></div>
+
+<!-- Background Dimmer -->
+
+
+
+
+
+<button class="primary"
+onclick="window.open('https://consilious.sharepoint.com/DataOps/Documents/Forms/AllItems.aspx?id=%2FDataOps%2FDocuments%2FProcessing%2FIssue%20Report&viewid=7c1a28e8%2Dbeca%2D4348%2D95c3%2D8d8f9d6e51ea','_blank')">
+Report New Issue
+</button>
+
+</div>
+
+
+<!-- ===================================================================================== -->
+<!-- JAVASCRIPT LOGIC -->
+<!-- ===================================================================================== -->
+
+<script>
+/* ==========================
+   SEARCHABLE DROPDOWN ENGINE
+   ========================== */
+function createSearchableDropdown(inputId, options) {
+    const input = document.getElementById(inputId);
+    const wrapper = document.getElementById(inputId + "-container");
+    const dropdown = document.getElementById(inputId + "-dropdown");
+
+    function render(filter = "") {
+        dropdown.innerHTML = "";
+        const filtered = options.filter(o => o.text.toLowerCase().includes(filter.toLowerCase()));
+        filtered.forEach(o => {
+            const div = document.createElement("div");
+            div.className = "search-item";
+            div.textContent = o.text;
+            div.onclick = () => {
+                input.value = o.value;
+                dropdown.style.display = "none";
+                updateTextareas();
+            };
+            dropdown.appendChild(div);
+        });
+    }
+
+    input.addEventListener("input", () => {
+        dropdown.style.display = "block";
+        render(input.value);
+    });
+
+    input.addEventListener("focus", () => {
+        dropdown.style.display = "block";
+        render(input.value);
+    });
+
+    document.addEventListener("click", (e) => {
+        if (!wrapper.contains(e.target)) dropdown.style.display = "none";
+    });
+
+    render("");
+}
+
+/* ============================================================
+   DROPDOWN DATA (ALL 6 LISTS)
+   ============================================================ */
+
+const preIntakeOptions = [
+    {value:"wrongPassword", text:"Wrong Password"},
+    {value:"psterror", text:"Error due to PST file"},
+    {value:"FastCopy", text:"FastCopy issue due to Large Size"},
+    {value:"Corruptempty", text:"Corrupt / empty / incomplete zips"},
+    {value:"shutdown", text:"Service desk shutdown"},
+    {value:"Bitdefender", text:"Bitdefender Issue"},
+    {value:"FullPath", text:"Full Path Error"},
+    {value:"SQLissue", text:"SQL issue with DOC DB"},
+    {value:"ParentDirectory", text:"ParentDirectory error"},
+    {value:"SpecialCharacter", text:"special character issue"},
+    {value:"ShortFilename", text:"Short filename issue"},
+    {value:"HeaderError", text:"Header error in zip"}
+];
+
+const importAutomationOptions = [
+    {value:"SAFESync", text:"SAFE ID Sync Failure"},
+    {value:"importencase", text:"Failed to import Encase"},
+    {value:"createconfiguration", text:"Failed to create configuration files"},
+    {value:"retrievejob", text:"Could not retrieve job"},
+    {value:"linkrequest", text:"Failed due to link request"},
+    {value:"Engagementissue", text:"Engagement issue"},
+    {value:"Technicianassigned", text:"Technician not assigned"},
+    {value:"Ticketstatus", text:"Incorrect ticket status"},
+    {value:"wrongpath", text:"Wrong intake path"},
+    {value:"Nofiles", text:"No files found"},
+    {value:"Nullparameter", text:"Null parameter"},
+    {value:"wrongIntake", text:"Wrong intake ticket"}
+];
+
+const processingOptions = [
+    {value:"fastCopyFailed", text:"Fast Copy Failed"},
+    {value:"StoredProc", text:"Stored Proc error"},
+    {value:"TimeZone", text:"Time Zone not supported"},
+    {value:"Incorrectsupply", text:"Incorrect NSF credentials"},
+    {value:"Incorrectsubject", text:"Incorrect subject line"},
+    {value:"Metadataexport", text:"Metadata export error"},
+    {value:"outofmemoryerror", text:"Java OutOfMemoryError"}
+];
+
+const migrateFilterOptions = [
+    {value:"failedMigrate", text:"Failed Migrate E043"},
+    {value:"timeOut", text:"Timeout error"},
+    {value:"fatalException", text:"No records found"},
+    {value:"NoQCTotals", text:"No QC totals found"}
+];
+
+const legalExportOptions = [
+    {value:"prodCount", text:"Prod Count > 0"},
+    {value:"caseMissing", text:"Case missing"},
+    {value:"scanFailed", text:"Scanning export failed"},
+    {value:"FastCopyFailing", text:"FastCopy failing"},
+    {value:"JavaHeapMemory", text:"Java heap memory issue"},
+    {value:"SeverFailing", text:"Server failing"},
+    {value:"FolderRestructured", text:"Folder restructured"}
+];
+
+const exportLoadfileOptions = [
+    {value:"bindingNull", text:"Binding null reference"},
+    {value:"scriptDateError", text:"Script date error"},
+    {value:"timeoutExpired", text:"Timeout expired"},
+    {value:"DataMappingExport", text:"Data mapping export error"}
+];
+
+/* CREATE ALL SEARCHABLE DROPDOWNS */
+createSearchableDropdown("preIntake", preIntakeOptions);
+createSearchableDropdown("importAutomation", importAutomationOptions);
+createSearchableDropdown("processing", processingOptions);
+createSearchableDropdown("migrateFilter", migrateFilterOptions);
+createSearchableDropdown("legalExport", legalExportOptions);
+createSearchableDropdown("exportLoadfile", exportLoadfileOptions);
+
+/* ======================================
+   YOUR EXISTING ISSUE DATA & TEXT FILLER
+   (I kept it unchanged)
+   ====================================== */
+
+
+
+const issueData = {
+    // Pre-Intake
+    wrongPassword: {
+        description: "Fatal error during intake  : Zip verification failed, wrong passowrd for archive.",
+        cause: "The ZIP file submitted during Pre-Intake is encrypted, and the password provided in the request does not match the actual encryption key.",
+        resolution: "🔧 RESOLUTION STEPS — WRONG PASSWORD ERROR\n\
+\n\
+📝 WHY THIS HAPPENS\n\
+DOC verifies and extracts ZIP files during Pre-Intake. If the ZIP is encrypted and the password given in ServiceNow is incorrect, DOC stops the workflow immediately.\n\
+\n\
+🧪 1️⃣ VALIDATE THE ZIP MANUALLY\n\
+• Right-click the ZIP → Test Archive (7-Zip)\n\
+• Enter the password provided by PM\n\
+• If it fails → the password is incorrect\n\
+• If it succeeds → the ZIP is healthy\n\
+\n\
+🔑 2️⃣ CONFIRM PASSWORD WITH PM\n\
+Ask the PM for:\n\
+• The correct password\n\
+• Whether multiple ZIPs have different passwords\n\
+\n\
+🗂️ 3️⃣ TEST USING WINRAR (MORE ACCURATE ERRORS)\n\
+WinRAR shows clear reasons:\n\
+• Wrong password\n\
+• Encrypted headers\n\
+• Incomplete archive\n\
+\n\
+If WinRAR accepts the password → the ZIP is valid.\n\
+\n\
+🛠️ 4️⃣ RE-SUBMIT PRE-INTAKE\n\
+Once password is verified:\n\
+• Re-submit the Pre-Intake with the correct password\n\
+\n\
+🚨 5️⃣ IF ERROR STILL OCCURS\n\
+The ZIP may be damaged or partially uploaded.\n\
+Ask PM for:\n\
+• A fresh copy of the ZIP\n\
+\n\
+✔ PREVENTION TIPS\n\
+• Validate encrypted ZIPs before job submission\n\
+• Always use 7-Zip or WinRAR (not Windows extractor)\n"
+    },
+    psterror: {
+        description: "Fatal error during intake  : Zip verification failed, unexpected end of archive.",
+        cause: "This error occurs when a PST file (email container) is submitted directly as a ZIP or the ZIP itself is incomplete, truncated, or damaged.",
+        resolution: "🔧 RESOLUTION STEPS — PST ERROR / UNEXPECTED END OF ARCHIVE\n\
+\n\
+📝 WHY THIS HAPPENS\n\
+A PST is not a standard ZIP-compressible folder. It is an Outlook email container file. When a PST is submitted directly as a ZIP or the ZIP is damaged or incomplete, DOC cannot validate the archive. This causes the 'unexpected end of archive' failure.\n\
+\n\
+PST files must be directly processed, not to submitted for pre-intake\n\
+✔ PREVENTION TIPS\n\
+• Never submit PST files directly for Pre-intake\n\ "
+    },
+    FastCopy: {
+        description: "Fatal error during intake  : One or more error occurred : Fastcopy failed to due to file-list copy.",
+        cause: "Failure occurs when FastCopy cannot handle large datasets (>50GB), long file paths, CJK characters, or when Bitdefender blocks/quarantines infected files, interrupting the copy operation.",
+        resolution: "🔧 RESOLUTION STEPS — FASTCOPY FAILURE (LARGE DATA / VIRUS DETECTED / SIZE LIMIT EXCEEDED)\n\
+\n\
+📝 WHY THIS HAPPENS\n\
+FastCopy is used by DOC to transfer evidence from the intake location to the NAS. It fails when the evidence contains:\n\
+• Extremely large data size (>50GB)\n\
+• Millions of small files\n\
+• Long or deeply-nested paths\n\
+• Special characters (CJK / Unicode)\n\
+• **Files detected as infected by Bitdefender**\n\
+\n\
+⚠️ COMMON ERROR PATTERNS\n\
+• \"FastCopy failed due to file-list copy\"\n\
+• \"Exceeded maximum retries\"\n\
+• \"Access denied\"\n\
+• \"The system cannot find the file specified\"\n\
+\n\
+🧪 1️⃣ CHECK THE DATA SIZE BEFORE SUBMISSION\n\
+If the dataset is above ~50GB:\n\
+✓ Avoid Pre-Intake\n\
+✓ Manual extraction or containerization is recommended\n\
+\n\
+🦠 2️⃣ BITDEFENDER VIRUS DETECTION & IMPACT\n\
+When Bitdefender identifies malware inside the evidence:\n\
+• Bitdefender tries to block the infected file\n\
+• If the blocking is incomplete, the file becomes locked\n\
+• FastCopy cannot read or copy the locked file → failure occurs\n\
+\n\
+🛡️ 3️⃣ **MANDATORY: LOG INTO THE MACHINE USED FOR THE PRE-INTAKE**\n\
+To confirm the infection:\n\
+• Log in to the Nuix/worker machine where Pre-Intake executed\n\
+• Navigate to the intake directory used by the job\n\
+• Manually scan using Bitdefender or check its event logs\n\
+• Identify the infected file flagged during the job\n\
+\n\
+🗑️ 4️⃣ **DELETE THE PARENT FOLDER OF THE INFECTED FILE**\n\
+If a virus is confirmed:\n\
+• Delete the entire parent folder containing the infected file\n\
+• This prevents partial or corrupted evidence reprocessing\n\
+• Do NOT retry the job without cleaning the dataset\n\
+\n\
+📣 5️⃣ **INFORM THE PM ABOUT THE VIRUS-INFECTED EVIDENCE**\n\
+Notify PM with:\n\
+• File name(s) detected as infected\n\
+• Location of the file\n\
+• Bitdefender detection type (Trojan, Malware, Riskware, etc.)\n\
+• Request a clean replacement of the evidence\n\
+\n\
+📦 6️⃣ SPLIT OR CONTAINERIZE THE DATA IF LARGE\n\
+Recommended:\n\
+• Break into 30–40GB batches\n\
+\n\
+📁 7️⃣ CHECK FOR PATH AND CHARACTER ISSUES\n\
+Look for:\n\
+• Very long file paths\n\
+• CJK characters\n\
+• Deep nested folder structures\n\
+These can also cause FastCopy failures.\n\
+\n\
+🛠️ 8️⃣ PERFORM MANUAL EXTRACTION IF NECESSARY\n\
+If FastCopy consistently fails:\n\
+• Extract the container manually on the order machine\n\
+• Submit the zips in separate batches\n\
+\n\
+✔ PREVENTION TIPS\n\
+• Scan evidence before submitting Pre-Intake\n\
+• Avoid ZIPs with extremely large sizes\n\
+\n\
+🚨 ESCALATE IF:\n\
+• FastCopy fails repeatedly even after cleanup\n\
+"
+    },
+     Corruptempty: {
+        description: "Fatal error during intake  : Zip verification failed, unexpected end of archive.",
+        cause: "This error occurs when the ZIP file is partially uploaded, damaged, not fully compressed, or contains missing segments that prevent DOC from validating its structure.",
+        resolution: "🔧 RESOLUTION STEPS — CORRUPT / EMPTY / INCOMPLETE ZIP\n\
+\n\
+📝 WHY THIS HAPPENS\n\
+DOC checks the internal structure of every ZIP submitted during Pre-Intake. If the archive is:\n\
+• Incomplete\n\
+• Partially downloaded or uploaded\n\
+• Not fully compressed before submission\n\
+• Or empty with no usable content\n\
+DOC throws an 'unexpected end of archive' or 'ZIP verification failed' error.\n\
+\n\
+⚠️ TYPICAL ERROR INDICATORS\n\
+• \"Unexpected end of archive\"\n\
+• \"Data after end of archive\"\n\
+• \"Headers error\"\n\
+• ZIP opens but shows 0 KB files\n\
+• ZIP opens but files cannot be extracted\n\
+\n\
+🧪 1️⃣ TEST THE ZIP FILE MANUALLY\n\
+Use 7-Zip or WinRAR:\n\
+• Right-click ZIP → **Test Archive**\n\
+• If the test fails → ZIP is incomplete or corrupt\n\
+• If only some files fail → partial corruption is present\n\
+\n\
+💻 2️⃣ CHECK FOR EMPTY OR DAMAGED CONTENT\n\
+Inside the ZIP, look for:\n\
+• 0 KB files\n\
+• Missing folders\n\
+• Unexpected file counts\n\
+• Files with broken icons or unreadable formats\n\
+\n\
+📣 3️⃣ REQUEST A CLEAN ZIP FROM PM\n\
+Inform PM that the ZIP is corrupt or incomplete. Request:\n\
+• A freshly zipped copy of the data\n• Ensure the ZIP is created using 7-Zip or WinRAR\n\ "
+    },
+     shutdown: {
+        description: "Error coverting value.",
+        cause: "This error is occurs when jobs get submitted inbetween maintanance frame.",
+        resolution: "• This issue occurs when Service Desk is under maintenance or temporarily offline.\n\
+• Because of this, DOC cannot fetch required ticket fields (Item, Group, H-Code, etc.).\n\
+• First, check if there is an active maintenance window in Service Desk.\n\
+• If maintenance is active, wait until it is completed.\n\
+• After maintenance ends, refresh the ticket and verify the fields are populated.\n\
+• Re-submit the Pre-Intake job once the Service Desk is fully available.\n\
+"
+    },
+Bitdefender: {
+        description: "Fatal error during intake  : Bitdefender runtime error occurs: ",
+        cause: "Bitdefender blocks or restricts access to files when it detects virus signatures, suspicious patterns, or scanning errors. When this happens, the file becomes locked, preventing FastCopy and DOC from copying or validating the evidence.",
+        resolution: "🔧 RESOLUTION — BITDEFENDER SCAN / VIRUS-BLOCK ISSUE\n\
+\n\
+📝 WHY THIS HAPPENS\n\
+Bitdefender runs a security scan on every file submitted during Pre-Intake.\n\
+If it detects a virus, suspicious content, or cannot fully scan a file, it will:\n\
+• Block the file from being accessed\n\
+• Mark the file as unsafe\n\
+• Lock the file to prevent copying\n\
+\n\
+When a file is blocked or locked:\n\
+• FastCopy cannot read or copy the file\n\
+• DOC reports a Pre-Intake failure\n\
+• The job stops before file extraction begins\n\
+\n\
+⚠️ COMMON SYMPTOMS IN LOGS\n\
+You will usually see:\n\
+• \"Bitdefender runtime error occurs\"\n\
+• \"FastCopy failed due to unreadable/locked file\"\n\
+• \"Access denied\" or \"File is in use by another process\"\n\
+\n\
+🖥️ 1️⃣ LOGIN TO THE MACHINE USED FOR PRE-INTAKE\n\
+Identify the Nuix/DOC machine where the job was processed.\n\
+Login and check the following:\n\
+• Bitdefender Notifications\n\
+• Bitdefender Threat Log\n\
+• Any recent virus/malware alerts\n\
+\n\
+🔍 2️⃣ CHECK IF ANY FILES WERE BLOCKED\n\
+Bitdefender may have flagged a file as:\n\
+• Virus detected\n\
+• Suspicious behavior\n\
+• Unable to scan\n\
+• Locked due to incomplete scan\n\
+\n\
+If a file was blocked, it cannot be copied by DOC.\n\
+\n\
+🗑️ 3️⃣ IF A VIRUS / INFECTED FILE IS FOUND\n\
+Perform the following steps:\n\
+• Identify the exact file flagged by Bitdefender\n\
+• Locate the *parent file* or container of the infected item\n\
+• Manually delete the infected file from the source path\n\
+• Inform the PM immediately and request replacement data\n\
+\n\
+This ensures the evidence set remains clean and no malicious files enter DOC.\n\
+\n\
+🔄 4️⃣ RE-TRY THE PRE-INTAKE\n\
+Once the virus/blocked file is removed:\n\
+• Validate the folder structure\n\
+• Confirm no new threats appear in Bitdefender\n\
+• Re-submit the Pre-Intake job\n\
+\n\
+✔ PREVENTION\n\
+• Always scan evidence manually before submitting large batches\n\
+• Avoid submitting corrupted or partially downloaded zips\n\
+• Confirm the ingest path does not contain temporary or suspicious files\n\
+\n\
+🚨 ESCALATE IF:\n\
+• Bitdefender keeps blocking multiple files\n\
+• You observe repeated runtime scan failures\n\
+• The job fails even after removing infected files\n\
+In such cases, inform your lead/L2 team for deeper investigation.\n\
+"
+    },
+FullPath: {
+        description: "Fatal error during intake  : failing job, check verobose log for full list of failures",
+        cause: "Windows and FastCopy have path-length limits. When evidence contains extremely long folder names or deeply nested directories, the effective path exceeds the system limit. This causes FastCopy to fail during Pre-Intake because it cannot read, access, or process these files.",
+        resolution: "🔧 RESOLUTION — LONG PATH / FULL PATH LIMIT EXCEEDED\n\
+\n\
+📝 WHY THIS HAPPENS\n\
+Windows supports a maximum path length (260 characters in many cases).\n\
+When evidence contains:\n\
+• Very long folder names\n\
+• Deeply nested directory structures\n\
+• Special characters increasing path length\n\
+\n\
+📂 1️⃣ IDENTIFY WHICH FILES HAVE LONG PATHS\n\
+Open the evidence folder and look for:\n\
+• Extremely long folder chains\n\
+• Unusually descriptive or repeated folder names\n\
+• ZIP files that expand into deep structures\n\
+\n\
+🛠️ 2️⃣ EXTRACT THE DATA MANUALLY\n\
+Because Pre-Intake cannot handle long-path structures, do the following:\n\
+• Extract the ZIP manually on the machine\n\
+\n\
+✔ PREVENTION\n\
+• Ask PM to provide cleaner, flatter evidence datasets\n\
+• Always test-open large ZIPs before submission\n\ "
+    },
+SQLissue: {
+        description: "1) Fatal exception for CommandId [3923147] in CommandService: Error on 3923147: Error setting value to 'TicketNumber' on 'CommandService.Commands.PreIntakeCommand'. -- Error setting value to 'TicketNumber' on 'CommandService.Commands.PreIntakeCommand'. \n2)Fatal exception for CommandId [3942822] in CommandService: Error on 3942822: Failed to retrieve all properties -- Failed to retrieve all properties. \n3) Fatal exception for CommandId [3943316] in CommandService: Error on 3943316: One or more errors occurred. (Failed to retrieve nuix case for A09781) -- One or more errors occurred. (Failed to retrieve nuix case for A09781)",
+        cause: "This occurs when DOC is unable to read values from the SQL backend due to incorrect metadata, missing properties, or temporary DB/server unavailability. Missing ticket fields such as Item, Group, H-Code, or case-related mappings trigger SQL read failures.",
+        resolution: "🔧 RESOLUTION — SQL PROPERTY RETRIEVAL / DB ACCESS FAILURE\n\
+\n\
+📝 WHY THIS HAPPENS\n\
+During Pre-Intake, DOC retrieves multiple values from SQL tables and Service Desk API, such as:\n\
+• Ticket Number\n\
+• H-Code\n\
+• Item and Group\n\
+• Case ID or SAFE ID\n\
+• Media-related properties\n\
+\n\
+If SQL cannot load these fields, DOC throws errors like:\n\
+• \"Failed to retrieve all properties\"\n\
+• \"Error setting value to TicketNumber\"\n\
+• \"Failed to retrieve nuix case\"\n\
+\n\
+This is almost always due to missing or invalid data in the ticket or temporary SQL/Server-side issues.\n\
+\n\
+🧪 1️⃣ CHECK TICKET PROPERTIES IN SERVICENOW\n\
+Open the ticket and verify the following fields are fully populated:\n\
+• Item\n\
+• Assignment Group\n\
+• H-Code\n\
+• Case ID / SAFE ID\n\
+• Correct Ticket Type (Intake / E-File Intake)\n\
+\n\
+If any field is blank → DOC cannot retrieve metadata.\n\
+\n\
+📣 2️⃣ INFORM PM IF TICKET DATA IS INCORRECT\n\
+• Update PM\n\
+• Ask them to correct the ticket details\n\
+• Proceed with Pre-Intake after validation\n\
+\n\
+🔄 3️⃣ RE-SUBMIT THE PRE-INTAKE\n\
+After all corrections:\n\
+• Refresh the ticket\n\
+• Confirm metadata is loading properly\n\
+• Re-submit the Pre-Intake job\n\
+\n\
+🚨 ESCALATE IF:\n\
+• SQL errors persist for correct tickets\n\
+• Multiple tickets fail with the same SQL issue\n\
+• Case or SAFE entries appear missing in the database\n\
+In these cases, raise an L2/App Support ticket for backend investigation.\n\
+"
+    },
+ParentDirectory: {
+        description: "Fatal error during intake: One or more errors occurred. (Error getting value from 'ParentDirectory' on 'Automation.Workflow.Batching.Entities.IntakeDetails'.)",
+        cause: "This occurs when an incorrect folder level is entered during Pre-Intake submission. DOC expects a valid ParentDirectory path pointing to the actual evidence root. If the folder hierarchy given does not exist, is misspelled, or points to an internal nested folder, DOC fails while trying to resolve the correct parent structure.",
+        resolution: "🔧 RESOLUTION — INVALID OR INCORRECT PARENT DIRECTORY PATH\n\
+\n\
+📝 WHY THIS HAPPENS\n\
+During Pre-Intake, DOC uses the ParentDirectory value to:\n\
+• Identify the root folder of the evidence\n\
+• Resolve path relationships\n\
+• Validate directory structure\n\
+• Build the internal processing path\n\
+\n\
+If the ParentDirectory value is wrong, DOC cannot locate the correct folder. This results in the error:\n\
+\"Error getting value from 'ParentDirectory' on 'Automation.Workflow.Batching.Entities.IntakeDetails'.\"\n\
+\n\
+⚠️ COMMON SYMPTOMS\n\
+You may observe:\n\
+• Pre-Intake failing as soon as the job starts\n\
+• Logs showing \"ParentDirectory\" mapping failure\n\
+• Evidence path not matching ticket entry\n\
+• Missing or mis-typed folder levels in intake form\n\
+\n\
+✏️  IDENTIFY THE CORRECT PRECEDING PATH LEVEL\n\
+🔄  RE-SUBMIT THE PRE-INTAKE\n\
+\n\
+✔ PREVENTION\n\
+• Always validate the folder structure before submission\n\ "
+    },
+SpecialCharacter: {
+        description: "Error while copying loose file from local storage to network/NAS path for special character filename included files",
+        cause: "FastCopy fails when evidence contains filenames with invalid special characters or non-standard Unicode symbols. These characters break the copy operation, causing DOC to halt the Pre-Intake workflow.",
+        resolution: "🔧 RESOLUTION — FASTCOPY FAILURE DUE TO SPECIAL CHARACTERS\n\
+\n\
+📝 WHY THIS HAPPENS\n\
+During Pre-Intake, DOC uses FastCopy to move loose files from the local staging area to the NAS evidence location.\n\
+FastCopy cannot handle filenames containing:\n\
+• ?  <  >  :  *  |  \"\n\
+• Emoji or non-Latin characters\n\
+• Hidden control characters\n\
+• Trailing spaces or periods\n\
+• Very long or malformed filenames\n\
+\n\
+When FastCopy encounters these filenames:\n\
+• It stops copying the affected file\n\
+• The entire transfer process fails\n\
+• DOC cannot proceed with file validation\n\
+• Pre-Intake job stops with a fatal error\n\
+\n\
+⚠️ COMMON SYMPTOMS IN LOGS\n\
+You may see errors like:\n\
+• \"Error while copying loose file using FastCopy\"\n\
+• \"Invalid filename or path\"\n\
+• \"FastCopy failed due to unsupported character\"\n\
+• \"Transfer aborted — file could not be copied\"\n\
+\n\
+🔍  IDENTIFY THE PROBLEMATIC FILENAME(S)\n\
+Review the dataset for:\n\
+• Special characters in names\n\
+• Unicode emojis or symbols\n\
+• Extremely long folder/file names\n\
+• Files extracted incorrectly from archived sources\n\
+\n\
+Often these files also cannot be copied manually through Windows Explorer.\n\
+\n\
+📨  INFORM PM IF THE ORIGINAL FILE IS INVALID\n\
+• Notify PM\n\
+• Request a corrected replacement file\n\
+• Provide the exact filename causing the issue\n\ "
+    },
+ShortFilename: {
+        description: "Short Filename issue ( filename include ~ )",
+        cause: "Windows creates short 8.3 filenames (containing '~') when the original filename is too long. These shortened names usually appear when files are copied or extracted on different systems. During Pre-Intake, DOC and FastCopy read the actual long names, but the NAS or extraction tool may generate short-name versions. This mismatch causes count inconsistencies and results in ingestion failure.",
+        resolution: "🔧 RESOLUTION — SHORT FILENAME (~) MISMATCH / COUNT ERROR\n\
+\n\
+📝 WHY THIS HAPPENS\n\
+Windows automatically generates short names such as:\n\
+• FILENA~1.PDF\n\
+• DOCUMENT~2.DOCX\n\
+\n\
+These appear when:\n\
+• The original filename is too long\n\
+• The extraction tool does not support Unicode\n\
+• ZIPs expand with truncated names\n\
+• Files are copied from old file systems or legacy media\n\
+\n\
+DOC expects the original long filename. But if the NAS or local extraction produces short versions, DOC encounters:\n\
+• File-count mismatch between local and NAS\n\
+• Missing or truncated filenames\n\
+• FastCopy copy failures\n\
+\n\
+⚠️ COMMON SYMPTOMS\n\
+You may see:\n\
+• \"Short filename issue\"\n\
+• \"File replacement/deletion on NAS\"\n\
+• Missing files after extraction\n\
+• Discrepancy between expected and extracted file count\n\
+\n\
+🔍  IDENTIFY SHORT OR TRUNCATED FILENAMES\n\
+Look inside the extracted folder for patterns like:\n\
+• Names containing '~'\n\
+• File extensions unexpectedly changed\n\
+• Duplicate ~1, ~2, ~3 patterns\n\
+• Extracted filenames not matching the source ZIP\n\
+\n\
+This confirms short-name translation occurred during extraction.\n\
+\n\
+🛠️ 2️⃣ RE - EXTRACT FILES MANUALLY USING A RELIABLE TOOL\n\
+To fix truncation, re - extract using: \n\
+• WinRAR\n\
+• 7 - Zip \n\
+\n\
+✔ PREVENTION\n\
+• Ask PM to avoid extremely long filenames\n\
+• Avoid extracting large ZIPs directly on NAS\n\
+• Use WinRAR for archives containing Unicode filenames\n\
+• Validate a few sample filenames before Pre - Intake\n\
+\n\ "
+    },
+HeaderError: {
+        description: "Fatal error during intake: Zips failed verification\nHeaders Error",
+        cause: "ZIP archives contain a header that stores internal file information. If this header is missing, incomplete, or corrupted, DOC and 7-Zip cannot interpret the ZIP structure, resulting in a header error. This usually occurs due to failed downloads, partial uploads, unsafe transfer tools, or damaged storage media.",
+        resolution: "🔧 RESOLUTION — ZIP HEADER CORRUPTION / HEADER ERROR\n\
+\n\
+📝 WHY THIS HAPPENS\n\
+Every ZIP file contains a **header** that describes:\n\
+• The list of files inside the ZIP\n\
+• The location of each file's data\n\
+• Compression details\n\
+• Archive integrity information\n\
+\n\
+If the header is damaged or incomplete:\n\
+• 7-Zip cannot map files properly\n\
+• DOC cannot validate or extract the archive\n\
+• Extraction stops with a 'Headers Error'\n\
+\n\
+This typically occurs due to:\n\
+• Incomplete or interrupted ZIP creation\n\
+• Corrupted upload/download from PM\n\
+• Network interruptions\n\
+• Bad sectors on storage drives\n\
+• ZIP created using non-standard or outdated archiving tools\n\
+\n\
+⚠️ SYMPTOMS IN LOGS / 7-ZIP OUTPUT\n\
+You may see:\n\
+• \"Headers Error\"\n\
+• \"Unexpected end of archive\"\n\
+• \"Cannot open file as archive\"\n\
+• \"Data after end of archive\"\n\
+• ZIP opens but only partially shows contents\n\
+\n\
+🔍 1️⃣ VALIDATE THE ZIP WITH 7-ZIP\n\
+Right-click → 7-Zip → **Test Archive**\n\
+This shows whether:\n\
+• The central directory is missing\n\
+• Files are incomplete\n\
+• Header is unreadable\n\
+\n\
+If 7-Zip reports errors, the ZIP is structurally damaged.\n\
+\n\
+🧪 2️⃣ TRY OPENING WITH WINRAR (Better Recovery)\n\
+WinRAR sometimes recovers data that 7-Zip cannot.\n\
+Steps:\n\
+• Open ZIP in WinRAR\n\
+• Check if files appear\n\
+• Attempt extraction\n\
+\n\
+If WinRAR cannot open or extract → ZIP is severely corrupted.\n\
+\n\
+Report to PM and request a new ZIP file created with a reliable tool (7-Zip or WinRAR) and ensure the upload completes without interruption.\n\ " 
+    },
+    // Import Automation
+    SAFESync: {
+        description: "Cannot intake file - SequentialCaseId has not been syncted from SAFE - no entry in source.evidmedia.",
+        cause: "During Import Automation, DOC validates the SAFE ID in the source.evidmedia table. If no matching record exists for the SAFE ID, DOC cannot map the incoming evidence to the correct case. This leads to a failed intake because the SequentialCaseId is missing, unsynchronized, or not inserted into the database.",
+        resolution: "🔧 RESOLUTION — MISSING SAFE ENTRY IN SQL (SequentialCaseId NOT SYNCED)\n\
+\n\
+1️⃣ **Verify the SAFE ID on Safe.consilio.com**\n\
+   • Confirm the SAFE ID exists and is correctly entered in the ticket.\n\
+   • Verify that the SAFE entry is complete and not in draft or partial state.\n\
+\n\
+2️⃣ **Check if the SAFE ID exists in DOC DB (source.evidmedia)**\n\
+   Execute the following SQL query:\n\
+   SELECT * FROM source.evidmedia WHERE seqCASEID = 'ENTER_SAFEID_HERE';\n\
+   • If a record is returned → the SAFE ID is synced.\n\
+   • If the query returns no rows → the SAFE ID never synced.\n\
+\n\
+3️⃣ **If the SAFE ID is missing**\n\
+   • Raise the issue with App Support.\n\
+   • Request validation of the SAFE-to-DOC synchronization.\n\
+\n\
+4️⃣ **Manual Insert (ONLY under App Support guidance)**\n\
+   If App Support confirms the SAFE ID is correct but unsynced, they may instruct you to run the below stored procedure:\n\
+\n\
+   USE [HXXXXX_EDD]\n\
+   GO\n\
+   DECLARE @return_value int\n\
+   EXEC @return_value = dbo.insertSAFEvalues\n\
+       @seqOrgID = 0,\n\
+       @seqCASEID = 'ENTER_SAFEID_HERE',\n\
+       @dateReceived = 'ENTER_DATE_HERE'\n\
+   SELECT 'Return Value' = @return_value;\n\
+   GO\n\
+\n\
+🚨 ESCALATE IF:\n\
+• insertSAFEvalues returns an error\n\
+• SAFE ID exists in SQL but DOC still cannot map it\n\
+• Multiple jobs fail due to missing SAFE sync\n\
+In these cases, escalate to L2/App Support — a backend synchronization or SAFE API issue may be present.\n\
+"
+    },
+     importencase: {
+        description: "Failed to import Encase file during Import Automation.\n\...Skipping",
+        cause: "During Import Automation, DOC processes EnCase exports by ingesting both metadata and extracted text files.\n\
+In this failure scenario, DOC only performs a partial import. It successfully creates mediaID entries for some eFiles, but the required text files fail to import into the IMPORTED folder on NAS.\n\
+This typically happens when:\n\
+• 📄 Missing or incomplete EnCase text files\n\
+• 🗂️ Corrupted or malformed EnCase export container\n\
+• 📁 Incorrect or inaccessible text extraction folder\n\
+• 🔗 Metadata exists but text files were never generated by EnCase\n\
+• 🧹 Previous failed import left partial DB entries blocking re-import",
+        resolution: "Follow the steps below to resolve the issue:\n\
+\n\
+1️⃣ **Validate the EnCase Export Files**\n\
+   • Ensure the EnCase export includes both metadata AND .txt files.\n\
+   • ⚠️ If text files are missing → the export is incomplete.\n\
+\n\
+2️⃣ **Verify NAS IMPORTED Folder**\n\
+   • Navigate to the IMPORTED folder for this SAFEID.\n\
+   • 📂 If .txt files are missing or incomplete → DOC could not ingest them.\n\
+\n\
+3️⃣ **Check audit.importFileLog**\n\
+   Run:\n\
+   SELECT * FROM audit.importFileLog WHERE fkMediaId = <MEDIAID>;\n\
+   • 🔍 fileLineCount = 0 and importRecordCount = 0 confirms incomplete import.\n\
+\n\
+4️⃣ **Remove Partial DB Entries (Before Retry)**\n\
+   A failed EnCase import leaves incomplete data in:\n\
+   • audit.importFileLog\n\
+   • audit.importFileDetails\n\
+   • IMP/EDD eFile tables\n\
+\n\
+   🛑 These MUST be deleted before retrying the import.\n\
+   • Request deletion of all partially inserted rows.\n\
+\n\
+5️⃣ **Re-run Import Automation After Cleanup**\n\
+   Once DB cleanup is done:\n\
+   • ▶️ Re-submit Import Automation.\n\
+   • Ensure correct EnCase export path.\n\
+   • Validate that the EnCase export structure is complete.\n\
+\n\
+    6️⃣ **Final Validation**\n\
+   After successful import:\n\
+   • ✅ IMPORTED folder contains all expected .txt files.\n\
+   • 📈 audit.importFileLog shows correct fileLineCount & importRecordCount.\n\ "
+    },
+    createconfiguration: {
+        description: "Could not retrieve DB Yaml Configs from the dbo.nProcdbYaml procedure….: Sequence contains no elements. Failed to create configuration files: Could not retrieve DB Yaml Configs from the dbo.nProcdbYaml procedure. Failed to execute the Nuix workflow: Failed to create configuration files.",
+        cause: "This error occurs when DOC cannot retrieve required configuration values for the Nuix workflow. The most common reason is missing Media Assignment for the Efile or missing configuration records in the database.",
+        resolution: "🔧 RESOLUTION — CREATECONFIGURATION FAILURE\n\
+        \n\
+1️⃣ VERIFY MEDIA ASSIGNMENT\n\
+• Go to Nuix Queuing → Jobs → Media Assignment\n\
+• Locate the MediaID related to the job\n\
+• Ensure a custodian is assigned to the media\n\
+\n\
+2️⃣ CHECK IF MEDIA EXISTS IN DATABASE\n\
+Run the query:\n\
+SELECT * FROM source.evidmedia WHERE fkMediaId = <MEDIAID>\n\
+\n\
+If no record exists, the media was not created correctly during Import Automation.\n\
+\n\
+3️⃣ VERIFY YAML CONFIGURATION PROCEDURE\n\
+Run:\n\
+EXEC dbo.nProcdbYaml\n\
+\n\
+If this returns no rows, the configuration values required for Nuix workflow are missing.\n\
+\n\
+4️⃣ RE-ASSIGN MEDIA AND RESUBMIT JOB\n\
+After assigning the correct custodian:\n\
+• Refresh the job queue\n\
+• Re-submit the Import Automation job\n\
+\n\
+🚨 ESCALATE IF:\n\
+• Media assignment already exists\n\
+• nProcdbYaml returns no records\n\
+• Multiple jobs fail with the same error\n\
+\n\
+In these cases escalate to App Support because the DOC DB configuration may be missing or corrupted."
+    },
+  retrievejob: {
+        description: "Could not retrieve job",
+        cause: "This error occurs when DOC cannot fetch the job record from the SQL database.The most common reason is a SQL timeout or temporary database connectivity issue between the DOC application server and the SQL server.",
+        resolution: "🔧 RESOLUTION — COULD NOT RETRIEVE JOB\n\
+        \n\
+1️⃣ CHECK FPLOG / DOC LOGS\n\
+• Identify the server where the Import Automation job ran.\n\
+• Open the FPLog or DOC logs for that server.\n\
+• Look for SQL timeout or database connectivity errors.\n\
+\n\
+2️⃣ VERIFY SQL SERVER STATUS\n\
+• Check if the database was under heavy load or maintenance.\n\
+• Look for timeout or connection errors around the same timestamp.\n\
+\n\
+3️⃣ CONFIRM JOB WAS NOT ALREADY CREATED\n\
+• Navigate to DOC → Job Queue / Import Automation queue.\n\
+• Ensure the job was not partially created.\n\
+• If the job exists but is stuck, cancel it before retrying.\n\
+\n\
+4️⃣ RESUBMIT THE IMPORT AUTOMATION JOB\n\
+If logs confirm a SQL timeout or temporary connection failure:\n\
+• Resubmit the job from the DOC interface.\n\
+• The job should complete successfully once SQL connectivity is restored.\n\
+\n\
+🚨 ESCALATE IF:\n\
+• Multiple jobs fail with 'Could not retrieve job'\n\
+• SQL connectivity issues persist\n\
+• DOC cannot connect to SQL server\n\
+\n\
+In these cases escalate to App Support / DBA team for database investigation."
+    },
+   linkrequest : {
+        description: "Fatal exception during intake : one or more errors occurred",
+        cause: "This error occurs when DOC attempts to associate the submitted job with a parent ServiceNow request but the relationship between the child request and parent ticket is missing or incorrectly configured. This commonly happens when jobs are submitted from child requests such as Production without Loadfile or other sub-requests that reference a parent ticket.",
+        resolution: "🔧 RESOLUTION — PARENT / CHILD REQUEST LINKING FAILURE\n\
+\n\
+1️⃣ VERIFY PARENT TICKET IN SERVICEDESK\n\
+• Open the intake ticket in Servicedesk.\n\
+• Check whether the request was submitted from a child request.\n\
+• Confirm the parent ticket number is correctly referenced.\n\
+\n\
+2️⃣ CHECK REQUEST RELATIONSHIP\n\
+• Ensure the child request is linked to the correct parent request.\n\
+• Verify the Parent Request / Parent Ticket field is populated.\n\
+\n\
+3️⃣ MANUALLY LINK THE REQUEST\n\
+If the relationship is missing:\n\
+• Update the child request with the correct parent ticket.\n\ "
+    },
+       Engagementissue : {
+        description: "Fatal exception during batch manager : failed export any efiles, no files found in data set",
+        cause: "This error occurs when the Engagement Number associated with the case or ticket is missing or not properly configured. DOC relies on the engagement value to determine the vertical and processing configuration. When this field is blank or invalid, the system cannot locate the expected dataset and the Batch Manager fails.",
+        resolution: "🔧 RESOLUTION — ENGAGEMENT NUMBER MISSING OR INVALID\n\
+            \n\
+1️⃣ VERIFY ENGAGEMENT IN THE CASE\n\
+• Open the details  in CASE.\n\
+• Check whether the Engagement Number is populated in ServiceNow.\n\
+            \n\
+2️⃣ UPDATE THE REQUEST TICKET\n\
+• Populate the correct Engagement Number in the ticket.\n\
+• Ensure the ticket fields are saved and refreshed.\n\
+            \n\
+3️⃣ RESUBMIT THE IMPORT AUTOMATION JOB\n\
+After correcting the engagement value: \n\
+• Re - submit the job from DOC.\n\
+            \n\
+🚨 ESCALATE IF: \n\
+• Engagement number exists but error persists\n\
+• Multiple tickets show the same issue\n\
+            \n\
+In these cases contact App Support to verify engagement mapping in the database."
+},
+    Technicianassigned : {
+        description: "Fatal exception during intake : Failed to validate ticket, Intake ticket does not have technican assigned",
+        cause: "Due to blank technician name on ticket throws this error.",
+        resolution: "For this error we can resubmit Import Automation job after technician got assigned"
+    },
+    Ticketstatus : {
+        description: "Fatal error during intake : Failed to vaildate ticket, status must be : In Progress, Reopened",
+        cause: "Due to inappropriate stauts like new and closed, this error throws.",
+        resolution: "Ticket status must be in progress, Reopened"
+    },
+    wrongpath : {
+        description: "Fatal exception of batch manager : The filename, directory name, or volume label syntax is incorrect.",
+        cause: "Technician has submitted wrong path, we need to submit data from source media not from IntakeBatchFiles .IntakeBatchFiles contains json file.",
+        resolution: "We can submit the new job with correct path"
+    },
+    Nofiles : {
+        description: "Fatal error during intake: Failed to export any eFiles, no files found in data set.",
+        cause: "Technician submitted blank path.",
+        resolution: "Please QC/check data in intake path submission and resubmit job."
+    },
+    Nullparameter : {
+        description: "Fatal error during intake: One or more errors occurred. (Value cannot be null. (Parameter 'value'))",
+        cause: "Technician submitted incoorect value while submitting intake or intake ticket is different than provided one.",
+        resolution: "Please crosscheck value for job settings or all paratmeters and re-submit job."
+    },
+    wrongIntake : {
+        description: "Fatal error during intake: Failed to validate ticket: Cannot retrieve ticket: Ticket ID XXXXXX does not exist",
+        cause: "Due to incorrect intake ticket number submission this error occurs",
+        resolution: "Please cross-check intake ticket and resubmit job."
+    },
+    
+
+
+
+    // Processing
+    fastCopyFailed: {
+        description: "FastCopy failed and exceeded maximum retry count of 3..",
+        cause: "This issue is caused due to fast copy error, due to the presence of special characters in filenames/ or  long file path issue  in CJK related data and filenames. ",
+        resolution: "check the source file format of file,  ingest the data containerizing the file preferrably in L01, smaller chunks of L01  format."
+    },
+    StoredProc: {
+        description: "Throws error at this stage:\nStored Proc Name:xxxxxxx\nFailed to excecute the nuix workflow.",
+        cause: "This happens due to low memory space in nuix machine caused due to run time temporary variable occupying memory and not gets free'd up. ",
+        resolution: "Try logging into nuix machines, check server status and error logs.\nIf you see the job is failed due to error: There is not enough space in disk.\nTry running a new job in a different nuix server machine."
+    },
+    TimeZone: {
+        description: "Time Zone is not supported by java[xxxxxx].\nThe NUIX process has crashed and exited with the following code:99.valid exit codes: 0, 1",
+        cause: "This issue is caused due to invalid format of time zone value being set in DB,for example include braces [] in timezone names.",
+        resolution: "Check the time zone setting value, change the setting to the appropriate value and re-start the processing job."
+    },
+    Incorrectsupply: {
+        description: "Incorrect password or key store '\\path'\nThe NUIX process has crashed and exited with the following code:99.valid exit codes: 0, 1",
+        cause: "This is caused due to incorrect ID/password setup for nsf data.",
+        resolution: "Check for each password's correctly whether the csv setup has the proper password set up with its corresponding ID values correctly.\nSometime password case gets changed, so be more cautious verifying password and re-try job."
+    },
+        Incorrectsubject: {
+        description: "Beginning Nuix Execution.\nThe NUIX process has crashed and exited with the following code:99.valid exit codes: 0, 1",
+        cause: "Intake electronic ticket in service now, ticket subject must contain as 'Data intake' in subject line.\nSAFEID can be updated along with Data intake, but 'Data intake'should not be completely removed",
+        resolution: "update the subject line properly in service now, and re-try the running intake/processing  job."
+    },
+    Metadataexport: {
+        description: "Inserting into Audit.QcTotals for mediaid xxx, a 'standard workflow'.\nFailed to execute Nuix workflow",
+        cause: "Due to  technical error, metadata export job may get interupted and ETL table and Audit.QC table is not  populated properly",
+        resolution: "1.check the  ETL table nuix result table count.\n2.verify the metadata log with ETL table and its record count.\n3.verify [Audit].[QC total], in case of error or partial job completion always necessary to deleted the ETL table for specific media id and re-try just metadata export in processing job submission."
+    },
+ outofmemoryerror: {
+        description: "Exception: java.lang.OutOfMemoryError thrown from the UncaughtExceptionHandler in thread 'mDNS Scheduled Thread'\nFailed to read Nuix Processing QcAudit report. The Nuix execution has likely failed. Report: Exception: java.lang.OutOfMemoryError\nFailed to execute the Nuix workflow",
+        cause: "This issue is caused due to memory issue in nuix server machine due to  runtime memory alloaction with temporary variable causing job to fail and halt with no progress.",
+        resolution: "Check for case file creation, also verify ETL metadata export. If present delete those and re-run just processing with only metadata export option in DOC.\nSometimes only config file is created, processing job is not started therefore verify the record count  in ETL table stage.nuixresult  and EDD table Audit.Qctotals, Mostly records is not found in both the table, simply re-run the processing job."
+    },
+
+
+    // Migrate Filter
+    failedMigrate: {
+        description: "Failed Migrate. E043: auditLogicalSize NOT populated in ETL nuixMain.",
+        cause: "This issue is caused due to Empty 0 KB file, Corrupt Archive, invalid container file",
+        resolution: "Verify the source files, check whether we are able to open file and read,if file is found corrupt or error update ticket asking for replacement file."
+    },
+    timeOut: {
+        description: "Unlocking process 'filter'\nUnknown error occurred during Filter: Timeout expired. The timeout period elapsed prior to completion of the operation or the server is not responding.\nMigrate and Filter resolves: {'StatusCode':-1,'Message':'Failed: Unknown error occurred during Filter: Timeout expired. The timeout period elapsed prior to completion of the operation or the server is not responding'}",
+        cause: "This happens due to migrate running for longer time with no completion in filter stage",
+        resolution: "verify the EDD Table, Audit QC tables along with stage.nuixmain and stage.nuixemail tables.\nsince migrate is completed and job gets locked in filter stage, the count should be matching in both tables therefore re-run just the filter job unchecking the migrate job."
+    },
+    fatalException: {
+        description: "Fatal exception for CommandId [3548299] in CommandService: Error on 3548299: No records found. TableName: sn_customerservice_task, QueryString number<CS7999999999>",
+        cause: "This is caused, when processing job is not finished completely and we run the migrate filter job.",
+        resolution: "verify processing job status for this particular media id, wait until the job completes fully."
+    },
+    NoQCTotals: {
+        description: "No QCTotals found for MediaId xx...\nUnable to compare ETL and EDD QC audit results. Please ensure that processing has been run for this MediaId: No QCTotals found for MediaId xx...",
+        cause: "ETL to EDD migration error.",
+        resolution: "Verify Audit QC logs, Nuix main , Nuix email and exception tables.\n1.If count doesn’t match, delete ETL folders from ETL table media id specific and re-run migrate/filter job.\n2.if count matches, re-run just filter job unchecking migrate option."
+    },
+
+    // Legal Export
+    prodCount: {
+        description: "Legal Export Prodcount is 4, There should be no prodcounts.Halting job...",
+        cause: "This issue is caused due to Legal Export Prod Count > 0.",
+        resolution: "Row count in ext.nuixProd is greater than 0, There should be no Prodcounts, Halting job.\nPlease follow below steps\n1. Please check nuixProd table for existing records\nSELECT  *   FROM [EXT].[nuixProd]\nWHERE fkMediaId = XXX\n--Replace XXX with MediaID\n2. If rows exist for the related reviewExportId, Manually Delete the data\n-- DELETE FROM [EXT].[nuixProd]\nWHERE fkMediaId = XXX\n/*please clear nuixProd of this reviewExportId (YYYY)\nbefore executing again*/\n3. Once the table is cleared, Please run these steps manually\n-Manually submitted Import Legal Export\n-Manually submitted Export Relativity Export"
+    },
+    caseMissing: {
+        description: "Case doesn't exist.",
+        cause: "Case path is invalid, moved, or network share not available.",
+        resolution: "Verify case location and network connectivity, then update path and retry export."
+    },
+    scanFailed: {
+        description: "Scanning exported files for viruses at: D:\\EXPORTSCAN\Acode\\nFailed to execute the Nuix workflow\nRunning PostJobCleanup...",
+        cause: "This will occurs while exporting the data from Nuix machine to share location",
+        resolution: "1.Go to the Nuix machine where the Legal export was performed.\n2.Check the Bitdefender status on that machine.\n3.If Bitdefender shows that the license has expired, please raise a ticket with the IT support team like below.\nPlease submit a ticket with the Category: \nApplication Support | Subcategory: DOC | Item: DOC - Job Failed Group: IT Infrastructure Server."
+    },
+    FastCopyFailing: {
+        description: "FastCopy failed and exceeded maximum retry count of 3. Please inspect the data.\nThe FastCopy move of D:\\EXPORTSCAN\Acode\ has failed for 3 files. The following files have not been copied.\nThe FastCopy operation move has returned an ExitCode of -1. This will require analysis of the Case data folders. Please verify counts in the following folders.",
+        cause: "This issue occurs nuix machine is copying the data to share location there may be a problem with Fastcopy",
+        resolution: "Do not retry these failed jobs:\nIf so it will overwrite the current machine name. \nThis will complicates the process for investigating on failed job as we will not be able to look at the EXPORTSCAN folder from the original machine. " 
+       },
+       JavaHeapMemory: {
+        description: "There is insufficient memory for the Java Runtime Environment to continue.\nThe Nuix process likely crashed. DOC will terminate. The Nuix process exited but the EndOfScript flag was set to false.",
+        cause: "This issue arises due to heap memory limitations, ultimately causing the process to terminate",
+        resolution: "1.Try contacting you Senior, Team lead/Submit an L2 ticket requesting an increase in heap memory.\n2.If the issue persists even after the heap memory is increased, we should split the data and submit it in multiple PES batches." 
+       },
+       SeverFailing: {
+        description: "Failed to execute workflow: Failed to execute the Nuix workflow",
+        cause: "This issue occurs when the server is failed to execute the Job",
+        resolution: "we can either retry or re-submit the job for processing." 
+       },
+       FolderRestructured: {
+        description: "Preparing FastCopy run against manifest file: \\path\nFastCopy failed and exceeded maximum retry count of 3. Please inspect the data.\nFailed to execute the Nuix workflow",
+        cause: "This error occurs when we have changed the folder structure after submitting a Job",
+        resolution: "Please check the source evidence JSON file which would be updated while import automation and rearranging the evidence back to the same folder which was initiated" 
+       },
+       
+    
+
+
+    // Export Loadfile
+    bindingNull: {
+        description: "Running Beehive metrics prod collection\nUnknown error occurred during ImportLegalExportLoadFile: Cannot perform runtime binding on a null reference",
+        cause: "This error we see in common and it is unknown error of binding a Null reference",
+        resolution: "1.Navigate to the Natives folder and check for the presence of the nativeFiles folder.\n2.If all the Nuix files are in place, you can proceed with the next steps of the workflow.\n3.In most cases, the required files will be available in that folder.\n4.If the files are missing, please restart the job"
+    },
+    scriptDateError: {
+        description: "Getting script contents for sprocs..\nFailed to get scriptContents for date. Either the service account doesn’t have permission or there could be a network error.\nUnknown error occurred during ImportLegalExportLoadFile: Failed to get scriptContents for date. Either the service account doesn’t have permission or there could be a network error.",
+        cause: "This is script error issue.",
+        resolution: "Please check the dat file we use for the Alpha code and correct it or export the dat manually and place in our usual location "
+    },
+    timeoutExpired: {
+        description: "Failed to Create load file from EXT.RetrieveLoadfileData_yy_yyyyyyyyyyyyy output: Timeout expired. The timeout period elapsed prior to completion of the operation or the server is not responding.",
+        cause: "Time out expired and failed the job",
+        resolution: "This appears to be a timeout error. Please re-submit the job, and it should complete successfully on retry."
+    },
+    DataMappingExport: {
+        description: "Failed to execute datamapping PES record insert.",
+        cause: "This error occurs when we have submitted the data in DataMapping Job",
+        resolution: "This is a common error observed during the DataMapping process and does not impact the workflow.\nYou can proceed with the next steps."
+    }
+};
+
+const dropdowns = [
+    'preIntake','importAutomation','processing','migrateFilter','legalExport','exportLoadfile'
+];
+
+const descriptionBox = document.getElementById('description');
+const causeBox = document.getElementById('cause');
+const resolutionBox = document.getElementById('resolution');
+
+
+dropdowns.forEach(id => {
+    document.getElementById(id).addEventListener('change', function () {
+        clearOtherDropdowns(id);   // clear old selection
+        updateTextareas();         // load new selection only
+    });
+});
+
+   function updateTextareas() {
+        let selectedKey = "";
+
+        dropdowns.forEach(id => {
+            const value = document.getElementById(id).value;
+            if (value) selectedKey = value;
+        });
+
+        if (selectedKey && issueData[selectedKey]) {
+            descriptionBox.value = issueData[selectedKey].description;
+            causeBox.value = issueData[selectedKey].cause;
+            document.getElementById("resolutionBox").textContent =
+                issueData[selectedKey].resolution;
+        } else {
+            descriptionBox.value = "";
+            causeBox.value = "";
+            document.getElementById("resolutionBox").textContent = "";
+        }
+    }
+
+
+    // Toggle animation
+const resolutionToggle = document.getElementById("resolutionToggle");
+const resolutionWrapper = document.getElementById("resolutionWrapper");
+
+    /* ======================================
+       CLEAN + FIXED RESOLUTION POPUP LOGIC
+    ====================================== */
+
+    function handleResolutionClick() {
+        const text = document.getElementById("resolutionBox").textContent.trim();
+
+        if (!text) {
+            alert("No resolution available for this selection.");
+            return;
+        }
+
+        openResolutionPanel(text);
+    }
+
+    function openResolutionPanel(text) {
+        const overlay = document.getElementById("resolutionOverlay");
+        const panel = document.getElementById("resolutionPanel");
+        const closeBtn = document.querySelector(".close-resolution-btn");
+
+        document.getElementById("resolutionPanelContent").textContent = text;
+
+        overlay.style.visibility = "visible";
+        overlay.style.opacity = "1";
+
+        panel.style.visibility = "visible";
+        panel.style.bottom = "0";
+
+        closeBtn.style.display = "block";
+    }
+
+    function closeResolutionPanel() {
+        const overlay = document.getElementById("resolutionOverlay");
+        const panel = document.getElementById("resolutionPanel");
+        const closeBtn = document.querySelector(".close-resolution-btn");
+
+        // slide down
+        panel.style.bottom = "-100%";
+        overlay.style.opacity = "0";
+        closeBtn.style.display = "none";
+
+        setTimeout(() => {
+            overlay.style.visibility = "hidden";
+            panel.style.visibility = "hidden";
+        }, 350);
+    }
+
+    document.getElementById("resolutionOverlay").addEventListener("click", closeResolutionPanel);
+
+    function clearOtherDropdowns(selectedId) {
+        dropdowns.forEach(id => {
+            if (id !== selectedId) {
+                document.getElementById(id).value = "";
+            }
+        });
+    }
+
+
+
+
+</script>
+
+</body>
+</html>
