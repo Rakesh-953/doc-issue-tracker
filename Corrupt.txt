@@ -1,0 +1,24 @@
+2026-01-27 19:43:16.3977|DEBUG|Automation.Workflow.PreIntake.PreIntake.ProcessNormal:206|Intake Options:  CST0000338789
+2026-01-27 19:43:16.3977|INFO|Automation.Workflow.PreIntake.PreIntake.ProcessNormal:207|Running IntakeBd against directory \\Ftpus\ftp_in\H_JPMC_TEST-IN\FROM_JPMC\HOUSE_JUDICIARY_COM...-LIT25048350_14-2026-01-27_1\14-R012326\D476999\R-1762268\EX_10_01-20-2021_to_01-20-2025
+2026-01-27 19:43:16.3977|INFO|Automation.Workflow.PreIntake.PreIntake.ProcessNormal:208|Job initiated on ServerName:US1CPAN24891
+2026-01-27 19:43:16.4019|INFO|Automation.Workflow.PreIntake.PreIntakeZips.PrescanZips:48|Checking \\Ftpus\ftp_in\H_JPMC_TEST-IN\FROM_JPMC\HOUSE_JUDICIARY_COM...-LIT25048350_14-2026-01-27_1\14-R012326\D476999\R-1762268\EX_10_01-20-2021_to_01-20-2025 for zips...
+2026-01-27 19:43:16.4350|INFO|Automation.Workflow.PreIntake.PreIntakeZips.PrescanZips:54|Found 4 top level containers
+2026-01-27 19:43:16.4350|DEBUG|Automation.Workflow.PreIntake.ConsoleRunner.Execute:25|Executing process with args: C:\Program Files\7-Zip\7z.exe t "\\Ftpus\ftp_in\H_JPMC_TEST-IN\FROM_JPMC\HOUSE_JUDICIARY_COM...-LIT25048350_14-2026-01-27_1\14-R012326\D476999\R-1762268\EX_10_01-20-2021_to_01-20-2025\LIT25048350_14_D476999_012021_012025_EX_Reports.zip"
+2026-01-27 19:43:16.4350|DEBUG|Automation.Workflow.PreIntake.ConsoleRunner.Execute:25|Executing process with args: C:\Program Files\7-Zip\7z.exe t "\\Ftpus\ftp_in\H_JPMC_TEST-IN\FROM_JPMC\HOUSE_JUDICIARY_COM...-LIT25048350_14-2026-01-27_1\14-R012326\D476999\R-1762268\EX_10_01-20-2021_to_01-20-2025\LIT25048350_14_D476999_012021_012025_EX_SearchLog.zip"
+2026-01-27 19:43:16.4350|DEBUG|Automation.Workflow.PreIntake.ConsoleRunner.Execute:25|Executing process with args: C:\Program Files\7-Zip\7z.exe t "\\Ftpus\ftp_in\H_JPMC_TEST-IN\FROM_JPMC\HOUSE_JUDICIARY_COM...-LIT25048350_14-2026-01-27_1\14-R012326\D476999\R-1762268\EX_10_01-20-2021_to_01-20-2025\PSTs.001.LIT25048350_14_D476999_012021_012025_EX.zip"
+2026-01-27 19:43:16.4350|DEBUG|Automation.Workflow.PreIntake.ConsoleRunner.Execute:25|Executing process with args: C:\Program Files\7-Zip\7z.exe t "\\Ftpus\ftp_in\H_JPMC_TEST-IN\FROM_JPMC\HOUSE_JUDICIARY_COM...-LIT25048350_14-2026-01-27_1\14-R012326\D476999\R-1762268\EX_10_01-20-2021_to_01-20-2025\Items.1.001.LIT25048350_14_D476999_012021_012025_EX.zip"
+2026-01-27 19:43:34.8210|ERROR|CommandService.Commands.PreIntakeCommand.Execute:109|Fatal error during intake: Zips failed verification
+Items.1.001.LIT25048350_14_D476999_012021_012025_EX.zip
+	Incomplete zip: 'Data after end of archive', possible corruption.
+System.Exception: Zips failed verification
+Items.1.001.LIT25048350_14_D476999_012021_012025_EX.zip
+	Incomplete zip: 'Data after end of archive', possible corruption.
+   at Automation.Workflow.PreIntake.PreIntakeZips.PrescanZips() in D:\workspace\ws_CommandService_release_7.10.4\Automation\Workflow\PreIntake\PreIntakeZips.cs:line 72
+   at Automation.Workflow.PreIntake.PreIntake.ProcessNormal() in D:\workspace\ws_CommandService_release_7.10.4\Automation\Workflow\PreIntake\PreIntake.cs:line 209
+   at Automation.Workflow.PreIntake.PreIntake.ExecuteProcessing() in D:\workspace\ws_CommandService_release_7.10.4\Automation\Workflow\PreIntake\PreIntake.cs:line 165
+   at Automation.Workflow.PreIntake.PreIntake.ExecutePreIntake(PreIntakeOptions op) in D:\workspace\ws_CommandService_release_7.10.4\Automation\Workflow\PreIntake\PreIntake.cs:line 64
+   at CommandService.Commands.PreIntakeCommand.Execute(Job job, CancellationToken token, IDbLogger dbLogger) in D:\workspace\ws_CommandService_release_7.10.4\CommandService\Commands\PreIntakeCommand.cs:line 109    at Automation.Workflow.PreIntake.PreIntakeZips.PrescanZips() in D:\workspace\ws_CommandService_release_7.10.4\Automation\Workflow\PreIntake\PreIntakeZips.cs:line 72
+   at Automation.Workflow.PreIntake.PreIntake.ProcessNormal() in D:\workspace\ws_CommandService_release_7.10.4\Automation\Workflow\PreIntake\PreIntake.cs:line 209
+   at Automation.Workflow.PreIntake.PreIntake.ExecuteProcessing() in D:\workspace\ws_CommandService_release_7.10.4\Automation\Workflow\PreIntake\PreIntake.cs:line 165
+   at Automation.Workflow.PreIntake.PreIntake.ExecutePreIntake(PreIntakeOptions op) in D:\workspace\ws_CommandService_release_7.10.4\Automation\Workflow\PreIntake\PreIntake.cs:line 64
+   at CommandService.Commands.PreIntakeCommand.Execute(Job job, CancellationToken token, IDbLogger dbLogger) in D:\workspace\ws_CommandService_release_7.10.4\CommandService\Commands\PreIntakeCommand.cs:line 109
